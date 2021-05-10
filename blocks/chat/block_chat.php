@@ -1,6 +1,7 @@
 <?php
-require __DIR__ . '/twilio-php-main/src/Twilio/autoload.php'; 
-// require_once '../../vendor/autoload.php';
+require_once __DIR__ . '/twilio-php-main/src/Twilio/autoload.php';
+require 'token.php';
+
 use Twilio\Rest\Client;
 
 class block_chat extends block_base {
@@ -21,23 +22,19 @@ class block_chat extends block_base {
         }
         // Initialise content inside chat box
         $this->get_chat_box_html();
-        $this->debug_to_console($this->chat_html);
 
-        $twilio = new Client($this->sid, $this->token);
+        $this->twilio = new Client($this->sid, $this->token);
+        
+        // $this->create_participant();
 
-        $conversation = $twilio->conversations->v1->conversations("CH6e668ea65b4c4ee789b28aa1a938049d")
-                                          ->fetch();
-
-        $this->debug_to_console($conversation->chatServiceSid);
-
+        // create access token to conversation
+        $output = createAccessToken(3600);
+        $this->debug_to_console2($output);
         
         // $this->page->requires->js_call_amd('block_chat/helloworld', 'init', array($first, $last));
         
         $this->content         =  new stdClass;
         $this->content->text   = $this->chat_html;
-        
-        // $this->content->footer = 'Footer here...';
-
      
         return $this->content;
     }
@@ -56,7 +53,26 @@ class block_chat extends block_base {
         $this->chat_html .= '<button class="btn btn-secondary" type="button" id="btn-send-message">Send</button>';
         $this->chat_html .= html_writer::end_tag('div');
         $this->chat_html .= html_writer::end_tag('div');
+    }
+
+    // Create participant identity if it does not currently exist.
+    private function create_participant() {
+        global $USER;
+        try {
+            $participant = $this->twilio->conversations->v1->conversations("CH6e668ea65b4c4ee789b28aa1a938049d")
+                                                           ->participants
+                                                           ->create([
+                                                                        "identity" => $USER->firstname . $USER->lastname
+                                                                        // "identity" => "Peter"
+                                                                    ]
+                                                             );
+            
+            $this->debug_to_console($participant->sid);
+        } catch ( Exception $e) {
+            // catch duplicate entries
+        }
         
+
         
     }
 
@@ -66,5 +82,12 @@ class block_chat extends block_base {
             $output = implode(',', $output);
     
         echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+    }
+    private function debug_to_console2($data) {
+        if(is_array($data) || is_object($data)) {
+          echo("<script>console.log('PHP: ".json_encode($data)."');</script>");
+        } else {
+          echo("<script>console.log('PHP: $data');</script>");
+        }
     }
 }
