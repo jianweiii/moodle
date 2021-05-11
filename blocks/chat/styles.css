@@ -33,6 +33,13 @@
     margin: 4px;
 }
 
+.block_chat #connection-status {
+    width: auto;
+    height: 28px;
+    text-align: center;
+    font-size: 18px;
+}
+
 /* Chat Message */
 .block_chat .chat-message {
     width: auto;

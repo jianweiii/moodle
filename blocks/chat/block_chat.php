@@ -20,33 +20,35 @@ class block_chat extends block_base {
         if ($this->content !== null) {
           return $this->content;
         }
-        // Initialise content inside chat box
+        // Initialise content
         $this->get_chat_box_html();
+        $this->content         =  new stdClass;
+        $this->content->text   = $this->chat_html;
 
         $this->twilio = new Client($this->sid, $this->token);
         
         // $this->create_participant();
 
         // create access token to conversation
-        $output = createAccessToken(3600);
-        $this->debug_to_console2($output);
+        $this->generatedToken = createAccessToken(30);
+        $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken));
         
-        // $this->page->requires->js_call_amd('block_chat/helloworld', 'init', array($first, $last));
         
-        $this->content         =  new stdClass;
-        $this->content->text   = $this->chat_html;
      
         return $this->content;
     }
 
     private function get_chat_box_html() {
         global $USER;
+        $this->chat_html .= '<script src="https://media.twiliocdn.com/sdk/js/conversations/v1.1/twilio-conversations.min.js"></script>';
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
         $this->chat_html .= '<div class="chat-header">Live Chat</div>';
         $this->chat_html .= '<div class="chat-username">Displayed name: ' . $USER->firstname . '</div>';
         $this->chat_html .= html_writer::end_tag('div');
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-body'));
+        $this->chat_html .= '<div id="connection-status"></div>';
+        $this->chat_html .= '<div id="messages"></div>';
         $this->chat_html .= html_writer::end_tag('div');
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-message'));
         $this->chat_html .= '<textarea name="message" id="user-typed-message" rows="2" placeholder="Type message here..."></textarea>';
