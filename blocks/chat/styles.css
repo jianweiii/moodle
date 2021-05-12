@@ -21,7 +21,7 @@
     text-align: center;
 }
 
-.block_chat .chat-username {
+.block_chat #connection-status {
     font-size: 20px;
     text-align: center;
 }
@@ -31,13 +31,15 @@
     width: auto;
     height: 434px;
     margin: 4px;
+    overflow: auto;
 }
 
-.block_chat #connection-status {
-    width: auto;
-    height: 28px;
-    text-align: center;
-    font-size: 18px;
+.block_chat #messages {
+    padding: 0px 15px;
+}
+
+.block_chat .message-container {
+    padding: 5px 15px;
 }
 
 /* Chat Message */

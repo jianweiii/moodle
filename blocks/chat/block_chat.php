@@ -21,6 +21,7 @@ class block_chat extends block_base {
           return $this->content;
         }
         // Initialise content
+        global $USER;
         $this->get_chat_box_html();
         $this->content         =  new stdClass;
         $this->content->text   = $this->chat_html;
@@ -44,10 +45,9 @@ class block_chat extends block_base {
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
         $this->chat_html .= '<div class="chat-header">Live Chat</div>';
-        $this->chat_html .= '<div class="chat-username">Displayed name: ' . $USER->firstname . '</div>';
+        $this->chat_html .= '<div id="connection-status"></div>';
         $this->chat_html .= html_writer::end_tag('div');
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-body'));
-        $this->chat_html .= '<div id="connection-status"></div>';
         $this->chat_html .= '<div id="messages"></div>';
         $this->chat_html .= html_writer::end_tag('div');
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-message'));
