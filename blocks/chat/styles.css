@@ -64,3 +64,22 @@
     padding: 0px;
     vertical-align: top;
 }
+
+/* Message Admin Options */
+.block_chat #message-admin-opt {
+    position: absolute;
+    z-index: 999;
+    width: 100px;
+    height: 100px;
+    background-color: #404040;
+    top: 0px;
+    left: 0px;
+}
+
+.hide {
+    visibility: hidden;
+}
+
+.show {
+    visibility: visible;
+}

@@ -27,12 +27,18 @@ class block_chat extends block_base {
         $this->content->text   = $this->chat_html;
 
         $this->twilio = new Client($this->sid, $this->token);
+        if (is_siteadmin()) {
+            $this->debug_to_console("Yes admin");    
+        } else {
+            $this->debug_to_console("Not admin");
+        }
+        
         
         // $this->create_participant();
 
         // create access token to conversation
-        $this->generatedToken = createAccessToken(30);
-        $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken));
+        $this->generatedToken = createAccessToken(100);
+        $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, is_siteadmin()));
         
         
      
@@ -54,6 +60,10 @@ class block_chat extends block_base {
         $this->chat_html .= '<textarea name="message" id="user-typed-message" rows="2" placeholder="Type message here..."></textarea>';
         $this->chat_html .= '<button class="btn btn-secondary" type="button" id="btn-send-message">Send</button>';
         $this->chat_html .= html_writer::end_tag('div');
+        $this->chat_html .= html_writer::end_tag('div');
+        $this->chat_html .= html_writer::start_tag('div', array('id' => 'message-admin-opt', 'class' => 'hide'));
+        $this->chat_html .= '<button type="button" id="delete-message">Delete Message</button>';
+        $this->chat_html .= '<button type="button" id="delete-participant">Delete Participant</button>';
         $this->chat_html .= html_writer::end_tag('div');
     }
 
@@ -84,12 +94,5 @@ class block_chat extends block_base {
             $output = implode(',', $output);
     
         echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
-    }
-    private function debug_to_console2($data) {
-        if(is_array($data) || is_object($data)) {
-          echo("<script>console.log('PHP: ".json_encode($data)."');</script>");
-        } else {
-          echo("<script>console.log('PHP: $data');</script>");
-        }
     }
 }
