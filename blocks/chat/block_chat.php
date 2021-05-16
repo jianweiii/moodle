@@ -7,14 +7,10 @@ use Twilio\Rest\Client;
 class block_chat extends block_base {
 
     private $chat_html = "";
-    private $sid = "AC366a8fd9a2425a6e4cbd0b14cd9a740f";
-    private $token = "c59fcd560d487e003eb47964f84b7ee0";
 
     public function init() {
         $this->title = get_string('pluginname', 'block_chat');
     }
-    // The PHP tag and the curly bracket for the class definition 
-    // will only be closed after there is another function added in the next section.
 
     public function get_content() {
         if ($this->content !== null) {
@@ -26,13 +22,14 @@ class block_chat extends block_base {
         $this->content         =  new stdClass;
         $this->content->text   = $this->chat_html;
 
-        $this->twilio = new Client($this->sid, $this->token);
+        $twilioAccountSid = getenv('TWILIO_ACCOUNT_SID');
+        $twilioAuthToken = getenv("TWILIO_AUTH_TOKEN");
+        $this->twilio = new Client($twilioAccountSid, $twilioAuthToken);
         if (is_siteadmin()) {
             $this->debug_to_console("Yes admin");    
         } else {
             $this->debug_to_console("Not admin");
         }
-        
         
         // $this->create_participant();
 
@@ -82,10 +79,7 @@ class block_chat extends block_base {
             $this->debug_to_console($participant->sid);
         } catch ( Exception $e) {
             // catch duplicate entries
-        }
-        
-
-        
+        }   
     }
 
     private function debug_to_console($data) {
