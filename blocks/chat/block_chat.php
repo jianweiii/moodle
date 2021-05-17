@@ -7,6 +7,8 @@ use Twilio\Rest\Client;
 class block_chat extends block_base {
 
     private $chat_html = "";
+    private $is_live = 0; 
+    private $conv_id = "";
 
     public function init() {
         $this->title = get_string('pluginname', 'block_chat');
@@ -17,34 +19,77 @@ class block_chat extends block_base {
           return $this->content;
         }
         // Initialise content
-        global $USER;
+        global $USER, $DB;
         $this->get_chat_box_html();
         $this->content         =  new stdClass;
         $this->content->text   = $this->chat_html;
 
-        $twilioAccountSid = getenv('TWILIO_ACCOUNT_SID');
-        $twilioAuthToken = getenv("TWILIO_AUTH_TOKEN");
-        $this->twilio = new Client($twilioAccountSid, $twilioAuthToken);
-        if (is_siteadmin()) {
-            $this->debug_to_console("Yes admin");    
-        } else {
-            $this->debug_to_console("Not admin");
+        // $twilioAccountSid = getenv('TWILIO_ACCOUNT_SID');
+        // $twilioAuthToken = getenv("TWILIO_AUTH_TOKEN");
+        // $this->twilio = new Client($twilioAccountSid, $twilioAuthToken);
+        // if (is_siteadmin()) {
+        //     $this->debug_to_console("Yes admin");    
+        // } else {
+        //     $this->debug_to_console("Not admin");
+        // }
+        
+        // Check DB
+        $this->is_live = $DB->get_record('block_chat', ['activity' => 'current'])->live;
+        if (($this->is_live == "0") && is_siteadmin()) {
+            $this->page->requires->js_call_amd('block_chat/init-conversation', 'createConversation');
+        }
+        if ($this->is_live == "1") {
+            $this->debug_to_console("true");
         }
         
-        // $this->create_participant();
-
-        // create access token to conversation
-        $this->generatedToken = createAccessToken(100);
-        $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, is_siteadmin()));
+        
+        // if (!$this->is_live && is_siteadmin()) {
+        //     
+        // }
+        // // create access token to conversation
+        // if ($this->is_live) {
+        // $this->generatedToken = createAccessToken(100);
+        // $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, is_siteadmin()));
+        // }
+        
         
         
      
         return $this->content;
     }
 
+    /**
+     * <div id="create-conversation">
+     *     <span id="conv-title">Conversation Title:</span>
+     *     <textarea name="conv-friendly-name" id="conv-friendly-name" rows="1" placeholder="Type title here..."></textarea>
+     *     <button type="button" id="go-live-btn">Go Live</button>
+     * </div>
+     * <div class="chat-app">
+     *     <div class="chat-title">
+     *         <div class="chat-header">Live Chat</div>
+     *         <div id="connection-status"></div>
+     *     </div>
+     *     <div class="chat-body">
+     *         <div id="messages"></div>
+     *     </div>
+     *     <div class="chat-message">
+     *         <textarea id="user-typed-message"></textarea>
+     *         <button id="btn-send-message"></button>
+     *     </div>
+     * </div>
+     * <div class="message-admin-opt">
+     *     <button id="delete-message">Delete Message</button>
+     *     <button id="delete-participant">Delete Participant</button>
+     * </div>
+     */
     private function get_chat_box_html() {
         global $USER;
         $this->chat_html .= '<script src="https://media.twiliocdn.com/sdk/js/conversations/v1.1/twilio-conversations.min.js"></script>';
+        $this->chat_html .= html_writer::start_tag('div', array('id' => 'create-conversation', 'class' => 'show'));
+        $this->chat_html .= '<span id="conv-title">Conversation Title:</span>';
+        $this->chat_html .= '<textarea name="conv-friendly-name" id="conv-friendly-name" rows="1" placeholder="Type title here..."></textarea>';
+        $this->chat_html .= '<button type="button" id="go-live-btn">Go Live</button>';
+        $this->chat_html .= html_writer::end_tag('div');
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
         $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
         $this->chat_html .= '<div class="chat-header">Live Chat</div>';

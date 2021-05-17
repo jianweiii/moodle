@@ -76,10 +76,34 @@
     left: 0px;
 }
 
-.hide {
+.block_chat .hide {
     visibility: hidden;
 }
 
-.show {
+.block_chat .show {
     visibility: visible;
+}
+
+.block_chat #create-conversation {
+    height: 60px;
+    padding: 5px 0px;
+}
+
+.block_chat #conv-title {
+    font-size: 30px;
+    padding-right: 5px;
+}
+
+.block_chat textarea[name=conv-friendly-name] {
+    resize: none;
+    width: 350px;
+    height: 50px;
+    vertical-align: top;
+    font-size: 20px;
+}
+
+.block_chat #go-live-btn {
+    vertical-align: top;
+    height: 50px;
+    margin-left: 5px;
 }

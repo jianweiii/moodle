@@ -68,8 +68,8 @@ export const connectChat = async (token, isAdmin) => {
  * After joining a conversation, load individual messages as a message bubble
  * @param {*} conversationJoined
  */
-const loadMessages = (conversationJoined) => {
-    conversationJoined.getMessages()
+const loadMessages = async (conversationJoined) => {
+    await conversationJoined.getMessages()
         .then( async (messageList) => {
             let messages = await messageList.items;
             messages.forEach( item => {
@@ -79,6 +79,8 @@ const loadMessages = (conversationJoined) => {
         .catch( err => {
             window.console.error("Couldn't fetch messages", err);
         });
+    let scrollMessage = document.getElementById("messages");
+    scrollMessage.lastChild.scrollIntoView();
 };
 
 /**

@@ -2,8 +2,9 @@
 
 require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->dirroot . "/blocks/chat/delete_message.php");
+require_once($CFG->dirroot . "/blocks/chat/create_conversation.php");
 
-class delete_chat_external extends external_api {
+class chat_external extends external_api {
     
     /**
     * Returns description of delete_message parameters.
@@ -24,7 +25,7 @@ class delete_chat_external extends external_api {
      */
     public static function delete_message($messageSid) {
         $params = self::validate_parameters(self::delete_message_parameters(), array('sid'=>$messageSid));
-        $result = get_delete_message($messageSid);
+        $result = get_delete_message($params['sid']);
         return array(
             'result' => $result
         );
@@ -80,5 +81,58 @@ class delete_chat_external extends external_api {
                 'success' => new external_value(PARAM_INT, '0 for fail, 1 for success')
             )
             );
+    }
+
+    /**
+    * Returns description of create_conversation parameters.
+    *
+    * @return external_function_parameters
+     */
+    public static function create_conversation_parameters() {
+        return new external_function_parameters(
+            array('title' => new external_value(PARAM_TEXT, 'title to create conversation in twilio')) 
+        );
+    }
+
+    /**
+     * Create conversation based on admin's choice of title
+     * 
+     * @param int $sid The sid of the particular participant
+     * @return array Success code: 0 for fail, 1 for success
+     */
+    public static function create_conversation($convTitle) {
+        global $DB;
+        $params = self::validate_parameters(self::create_conversation_parameters(), array('title'=>$convTitle));
+        $result = get_create_conversation($params['title']);
+        // $result = "CH52ffd5ba92c343b4bbd5f0474f35e621";
+        // $table = "mdl_block_chat";
+        // $data_object = array(
+        //     "id"           => "1",
+        //     "activity"     => "current",
+        //     "live"         => true,
+        //     "conversation" => $result
+        // );
+        // $DB->update_record($table, $data_object, $bulk=false);
+        return array(
+            'title'   => $params['title'],
+            'success' => $result['success'],
+            'id'      => $result['id']
+
+        );
+    }
+
+    /**
+     * Returns value of success of deleted participant
+     * 
+     * @return external_single_structure
+     */
+    public static function create_conversation_returns() {
+        return new external_single_structure(
+            array(
+                'title' => new external_value(PARAM_TEXT, 'title of conversation'),
+                'success' => new external_value(PARAM_TEXT, 'success of conversation'),
+                'id' => new external_value(PARAM_TEXT, 'sid of conversation')
+            )
+        );
     }
 }
