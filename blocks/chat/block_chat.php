@@ -7,7 +7,7 @@ use Twilio\Rest\Client;
 class block_chat extends block_base {
 
     private $chat_html = "";
-    private $is_live = 0; 
+    private $info = 0; 
 
     public function init() {
         $this->title = get_string('pluginname', 'block_chat');
@@ -19,44 +19,26 @@ class block_chat extends block_base {
         }
         // Initialise content
         global $USER, $DB;
+
+        $current_user = $USER->firstname;
         
         // Check DB
-        $this->is_live = $DB->get_record('block_chat', ['activity' => 'current'])->live;
-        if (($this->is_live == "0") && is_siteadmin()) {
+        $this->info = $DB->get_record('block_chat', ['id' => 1]);
+        if (is_siteadmin()) {
             $this->page->requires->js_call_amd('block_chat/init-conversation', 'createConversation');
+            $this->page->requires->js_call_amd('block_chat/init-conversation', 'endConversation');
         }
-        if ($this->is_live == "1") {
-            $this->debug_to_console("true");
+        if ($this->info->live == "1") {
+            // create access token for twilio client
+            $this->create_participant($current_user, $this->info->conv);
+            $this->generatedToken = createAccessToken(100, $current_user);
+            $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, $this->info->conv, is_siteadmin()));
         }
 
         $this->get_chat_box_html();
         $this->content         =  new stdClass;
-        $this->content->text   = $this->chat_html;
-
-        // $twilioAccountSid = getenv('TWILIO_ACCOUNT_SID');
-        // $twilioAuthToken = getenv("TWILIO_AUTH_TOKEN");
-        // $this->twilio = new Client($twilioAccountSid, $twilioAuthToken);
-        // if (is_siteadmin()) {
-        //     $this->debug_to_console("Yes admin");    
-        // } else {
-        //     $this->debug_to_console("Not admin");
-        // }
+        $this->content->text   = $this->chat_html; 
         
-        
-        
-        
-        // if (!$this->is_live && is_siteadmin()) {
-        //     
-        // }
-        // // create access token to conversation
-        // if ($this->is_live) {
-        // $this->generatedToken = createAccessToken(100);
-        // $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, is_siteadmin()));
-        // }
-        
-        
-        
-     
         return $this->content;
     }
 
@@ -65,6 +47,7 @@ class block_chat extends block_base {
      *     <span id="conv-title">Conversation Title:</span>
      *     <textarea name="conv-friendly-name" id="conv-friendly-name" rows="1" placeholder="Type title here..."></textarea>
      *     <button type="button" id="go-live-btn">Go Live</button>
+     *     <button type="button" id="end-btn">End</button>
      * </div>
      * <div class="chat-app">
      *     <div class="chat-title">
@@ -87,15 +70,15 @@ class block_chat extends block_base {
     private function get_chat_box_html() {
         global $USER;
         $this->chat_html .= '<script src="https://media.twiliocdn.com/sdk/js/conversations/v1.1/twilio-conversations.min.js"></script>';
-        if (($this->is_live == "0") && is_siteadmin()) {
+        if (is_siteadmin()) {
             $this->chat_html .= html_writer::start_tag('div', array('id' => 'create-conversation', 'class' => 'show'));
             $this->chat_html .= '<span id="conv-title">Conversation Title:</span>';
             $this->chat_html .= '<textarea name="conv-friendly-name" id="conv-friendly-name" rows="1" placeholder="Type title here..."></textarea>';
             $this->chat_html .= '<button type="button" id="go-live-btn">Go Live</button>';
+            $this->chat_html .= '<button type="button" id="end-btn">End</button>';
             $this->chat_html .= html_writer::end_tag('div');
         }
-        if ($this->is_live == "1") {
-            $this->debug_to_console("true");
+        if ($this->info->live == "1") {
             $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
             $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
             $this->chat_html .= '<div class="chat-header">Live Chat</div>';
@@ -117,18 +100,18 @@ class block_chat extends block_base {
     }
 
     // Create participant identity if it does not currently exist.
-    private function create_participant() {
-        global $USER;
+    private function create_participant($identity, $conv) {
+        $twilioAccountSid = getenv('TWILIO_ACCOUNT_SID');
+        $twilioAuthToken = getenv("TWILIO_AUTH_TOKEN");
+        $twilio = new Client($twilioAccountSid, $twilioAuthToken);
         try {
-            $participant = $this->twilio->conversations->v1->conversations("CH6e668ea65b4c4ee789b28aa1a938049d")
+            $participant = $twilio->conversations->v1->conversations($conv)
                                                            ->participants
                                                            ->create([
-                                                                        "identity" => $USER->firstname . $USER->lastname
+                                                                        "identity" => $identity
                                                                         // "identity" => "Peter"
                                                                     ]
                                                              );
-            
-            $this->debug_to_console($participant->sid);
         } catch ( Exception $e) {
             // catch duplicate entries
         }   

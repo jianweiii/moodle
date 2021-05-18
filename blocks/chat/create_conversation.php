@@ -21,7 +21,6 @@ function get_create_conversation($title) {
                                           );
         $result['success'] = "true";
         $result['id'] = $conversation->sid;
-        // $result['id'] = "CH6181545e13874480bbed3f0612ce1a40";
     } catch ( Exception $e) {
         $result['success'] = "false";
         $result['id'] = $e;

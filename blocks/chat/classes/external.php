@@ -104,32 +104,12 @@ class chat_external extends external_api {
         global $DB;
         $params = self::validate_parameters(self::create_conversation_parameters(), array('title'=>$convTitle));
         // $result = get_create_conversation($params['title']);
-        $result = "CH52ffd5ba92c343b4bbd5f0474f35e621";
+        $result['id'] = "CH52ffd5ba92c343b4bbd5f0474f35e621";
+        // $result['id'] = "";
+        $result['success'] = "true";
         $table = "mdl_block_chat";
-        // $data_object = array(
-        //     "id"           => 1,
-        //     "activity"     => "current",
-        //     "live"         => 1,
-        //     "conversation" => $result
-        // );
-        // $data_object = array(
-        //     "activity"     => "current",
-        //     "live"         => 1,
-        //     "conversation" => $result
-        // );
-        // $dataobj = new stdclass;
-        // $dataobj->id = 1;
-        // $dataobj->activity = "current";
-        // $dataobj->live = 1;
-        // $dataobj->conv = $result;
-        $dataobject= array(
-            'id'          => "1",
-            'live'        => "1",
-            'conv'        => "hello"
-        );
-        $sql = "UPDATE mdl_block_chat SET live=1, conv=" . "'" . $result . "'" . "  WHERE id=1";
+        $sql = "UPDATE mdl_block_chat SET live=1, conv=" . "'" . $result['id'] . "'" . "  WHERE id=1";
 
-        global $DB;
         try {
             $transaction = $DB->start_delegated_transaction();
             $DB->execute($sql);
@@ -139,9 +119,8 @@ class chat_external extends external_api {
         }
         return array(
             'title'   => $params['title'],
-            'success' => "success",
-            'id'      => json_encode($result)
-
+            'success' => $result['success'],
+            'id'      => $result['id']
         );
     }
 
@@ -156,6 +135,54 @@ class chat_external extends external_api {
                 'title' => new external_value(PARAM_TEXT, 'title of conversation'),
                 'success' => new external_value(PARAM_TEXT, 'success of conversation'),
                 'id' => new external_value(PARAM_TEXT, 'sid of conversation')
+            )
+        );
+    }
+
+    /**
+    * Returns description of end_conversation parameters.
+    *
+    * @return external_function_parameters
+     */
+    public static function end_conversation_parameters() {
+        return new external_function_parameters(
+            array() 
+        );
+    }
+
+    /**
+     * End current session of conversation
+     * 
+     * @return array Success code: 0 for fail, 1 for success
+     */
+    public static function end_conversation() {
+        global $DB;
+        $table = "mdl_block_chat";
+        $sql = "UPDATE mdl_block_chat SET live=0, conv='' WHERE id=1";
+        $result = "";
+        try {
+            $transaction = $DB->start_delegated_transaction();
+            $DB->execute($sql);
+            $transaction->allow_commit();
+            $result = "true";
+        } catch(Exception $e) {
+            $transaction->rollback($e);
+            $result = "false";
+        }
+        return array(
+            'success' => $result
+        );
+    }
+
+    /**
+     * Returns value of success of deleted participant
+     * 
+     * @return external_single_structure
+     */
+    public static function end_conversation_returns() {
+        return new external_single_structure(
+            array(
+                'success' => new external_value(PARAM_TEXT, 'success of ending conversation')
             )
         );
     }

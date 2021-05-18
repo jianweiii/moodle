@@ -3,16 +3,16 @@ import { deleteMessage, deleteParticipant } from './menu-button';
 let messageWindow = document.getElementById("messages");
 let userAdminRole = null;
 let messageToDelete = null;
+let conversationJoined = null;
 
 /**
  * Core function that establishes connection with Twilio API
  * @param {String} token
  * @param {Boolean} isAdmin
  */
-export const connectChat = async (token, isAdmin) => {
+export const connectChat = async (token, convId, isAdmin) => {
     const Twilio = window.Twilio;
     let conversationsClient = await Twilio.Conversations.Client.create(token);
-    let conversationJoined = null;
     userAdminRole = isAdmin;
 
     initDeleteButtons();
@@ -38,10 +38,16 @@ export const connectChat = async (token, isAdmin) => {
         }
     });
 
-    // Upon joining conversation, populate messages and load it into message window
-    conversationsClient.on("conversationJoined", (conversation) => {
+    // // Upon joining conversation, populate messages and load it into message window
+    // conversationsClient.on("conversationJoined", (conversation) => {
+    //     window.console.log(conversation);
+    //     conversationJoined = [...conversationJoined, conversation];
+    //     window.console.log(conversationJoined);
+    //     loadMessages(conversation);
+    // });
+    conversationsClient.getConversationBySid(convId).then(conversation => {
         conversationJoined = conversation;
-        loadMessages(conversation);
+        loadMessages(conversationJoined);
     });
 
     // When new messages are added, update message window
@@ -80,7 +86,12 @@ const loadMessages = async (conversationJoined) => {
             window.console.error("Couldn't fetch messages", err);
         });
     let scrollMessage = document.getElementById("messages");
-    scrollMessage.lastChild.scrollIntoView();
+    try {
+        scrollMessage.lastChild.scrollIntoView();
+    }
+    catch(err) {
+        // catches it when new convo is created and 0 messages currently
+    }
 };
 
 /**

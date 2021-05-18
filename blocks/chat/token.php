@@ -4,7 +4,7 @@ use Twilio\Jwt\AccessToken;
 use Twilio\Jwt\Grants\ChatGrant;
 
 
-function createAccessToken($duration) {
+function createAccessToken($duration, $identity) {
   // Required for all Twilio access tokens
   $twilioAccountSid = getenv('TWILIO_ACCOUNT_SID');
   $twilioApiKey = getenv('TWILIO_API_KEY');
@@ -12,8 +12,6 @@ function createAccessToken($duration) {
 
   // Required for Chat grant
   $serviceSid = getenv('SERVICE_SID');
-  // choose a random username for the connecting user
-  $identity = "Jianwei";
 
   // Create access token, which we will serialize and send to the client
   $token = new AccessToken(
