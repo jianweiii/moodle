@@ -8,7 +8,6 @@ class block_chat extends block_base {
 
     private $chat_html = "";
     private $is_live = 0; 
-    private $conv_id = "";
 
     public function init() {
         $this->title = get_string('pluginname', 'block_chat');
@@ -20,6 +19,16 @@ class block_chat extends block_base {
         }
         // Initialise content
         global $USER, $DB;
+        
+        // Check DB
+        $this->is_live = $DB->get_record('block_chat', ['activity' => 'current'])->live;
+        if (($this->is_live == "0") && is_siteadmin()) {
+            $this->page->requires->js_call_amd('block_chat/init-conversation', 'createConversation');
+        }
+        if ($this->is_live == "1") {
+            $this->debug_to_console("true");
+        }
+
         $this->get_chat_box_html();
         $this->content         =  new stdClass;
         $this->content->text   = $this->chat_html;
@@ -33,14 +42,7 @@ class block_chat extends block_base {
         //     $this->debug_to_console("Not admin");
         // }
         
-        // Check DB
-        $this->is_live = $DB->get_record('block_chat', ['activity' => 'current'])->live;
-        if (($this->is_live == "0") && is_siteadmin()) {
-            $this->page->requires->js_call_amd('block_chat/init-conversation', 'createConversation');
-        }
-        if ($this->is_live == "1") {
-            $this->debug_to_console("true");
-        }
+        
         
         
         // if (!$this->is_live && is_siteadmin()) {
@@ -85,28 +87,33 @@ class block_chat extends block_base {
     private function get_chat_box_html() {
         global $USER;
         $this->chat_html .= '<script src="https://media.twiliocdn.com/sdk/js/conversations/v1.1/twilio-conversations.min.js"></script>';
-        $this->chat_html .= html_writer::start_tag('div', array('id' => 'create-conversation', 'class' => 'show'));
-        $this->chat_html .= '<span id="conv-title">Conversation Title:</span>';
-        $this->chat_html .= '<textarea name="conv-friendly-name" id="conv-friendly-name" rows="1" placeholder="Type title here..."></textarea>';
-        $this->chat_html .= '<button type="button" id="go-live-btn">Go Live</button>';
-        $this->chat_html .= html_writer::end_tag('div');
-        $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
-        $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
-        $this->chat_html .= '<div class="chat-header">Live Chat</div>';
-        $this->chat_html .= '<div id="connection-status"></div>';
-        $this->chat_html .= html_writer::end_tag('div');
-        $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-body'));
-        $this->chat_html .= '<div id="messages"></div>';
-        $this->chat_html .= html_writer::end_tag('div');
-        $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-message'));
-        $this->chat_html .= '<textarea name="message" id="user-typed-message" rows="2" placeholder="Type message here..."></textarea>';
-        $this->chat_html .= '<button class="btn btn-secondary" type="button" id="btn-send-message">Send</button>';
-        $this->chat_html .= html_writer::end_tag('div');
-        $this->chat_html .= html_writer::end_tag('div');
-        $this->chat_html .= html_writer::start_tag('div', array('id' => 'message-admin-opt', 'class' => 'hide'));
-        $this->chat_html .= '<button type="button" id="delete-message">Delete Message</button>';
-        $this->chat_html .= '<button type="button" id="delete-participant">Delete Participant</button>';
-        $this->chat_html .= html_writer::end_tag('div');
+        if (($this->is_live == "0") && is_siteadmin()) {
+            $this->chat_html .= html_writer::start_tag('div', array('id' => 'create-conversation', 'class' => 'show'));
+            $this->chat_html .= '<span id="conv-title">Conversation Title:</span>';
+            $this->chat_html .= '<textarea name="conv-friendly-name" id="conv-friendly-name" rows="1" placeholder="Type title here..."></textarea>';
+            $this->chat_html .= '<button type="button" id="go-live-btn">Go Live</button>';
+            $this->chat_html .= html_writer::end_tag('div');
+        }
+        if ($this->is_live == "1") {
+            $this->debug_to_console("true");
+            $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
+            $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
+            $this->chat_html .= '<div class="chat-header">Live Chat</div>';
+            $this->chat_html .= '<div id="connection-status"></div>';
+            $this->chat_html .= html_writer::end_tag('div');
+            $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-body'));
+            $this->chat_html .= '<div id="messages"></div>';
+            $this->chat_html .= html_writer::end_tag('div');
+            $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-message'));
+            $this->chat_html .= '<textarea name="message" id="user-typed-message" rows="2" placeholder="Type message here..."></textarea>';
+            $this->chat_html .= '<button class="btn btn-secondary" type="button" id="btn-send-message">Send</button>';
+            $this->chat_html .= html_writer::end_tag('div');
+            $this->chat_html .= html_writer::end_tag('div');
+            $this->chat_html .= html_writer::start_tag('div', array('id' => 'message-admin-opt', 'class' => 'hide'));
+            $this->chat_html .= '<button type="button" id="delete-message">Delete Message</button>';
+            $this->chat_html .= '<button type="button" id="delete-participant">Delete Participant</button>';
+            $this->chat_html .= html_writer::end_tag('div');
+        }
     }
 
     // Create participant identity if it does not currently exist.

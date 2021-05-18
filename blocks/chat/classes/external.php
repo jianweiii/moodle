@@ -103,20 +103,44 @@ class chat_external extends external_api {
     public static function create_conversation($convTitle) {
         global $DB;
         $params = self::validate_parameters(self::create_conversation_parameters(), array('title'=>$convTitle));
-        $result = get_create_conversation($params['title']);
-        // $result = "CH52ffd5ba92c343b4bbd5f0474f35e621";
-        // $table = "mdl_block_chat";
+        // $result = get_create_conversation($params['title']);
+        $result = "CH52ffd5ba92c343b4bbd5f0474f35e621";
+        $table = "mdl_block_chat";
         // $data_object = array(
-        //     "id"           => "1",
+        //     "id"           => 1,
         //     "activity"     => "current",
-        //     "live"         => true,
+        //     "live"         => 1,
         //     "conversation" => $result
         // );
-        // $DB->update_record($table, $data_object, $bulk=false);
+        // $data_object = array(
+        //     "activity"     => "current",
+        //     "live"         => 1,
+        //     "conversation" => $result
+        // );
+        // $dataobj = new stdclass;
+        // $dataobj->id = 1;
+        // $dataobj->activity = "current";
+        // $dataobj->live = 1;
+        // $dataobj->conv = $result;
+        $dataobject= array(
+            'id'          => "1",
+            'live'        => "1",
+            'conv'        => "hello"
+        );
+        $sql = "UPDATE mdl_block_chat SET live=1, conv=" . "'" . $result . "'" . "  WHERE id=1";
+
+        global $DB;
+        try {
+            $transaction = $DB->start_delegated_transaction();
+            $DB->execute($sql);
+            $transaction->allow_commit();
+        } catch(Exception $e) {
+            $transaction->rollback($e);
+        }
         return array(
             'title'   => $params['title'],
-            'success' => $result['success'],
-            'id'      => $result['id']
+            'success' => "success",
+            'id'      => json_encode($result)
 
         );
     }

@@ -25,3 +25,7 @@ CREATE TABLE mdl_block_chat (
 
 INSERT INTO mdl_block_chat (activity, live)
 VALUES ("current", false);
+
+## mysqldump
+./mysqldump -u root -p moodle > /Applications/MAMP/htdocs/moodle/exported_db.sql
+password: root
