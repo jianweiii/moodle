@@ -38,16 +38,14 @@ export const connectChat = async (token, convId, isAdmin) => {
         }
     });
 
-    // // Upon joining conversation, populate messages and load it into message window
-    // conversationsClient.on("conversationJoined", (conversation) => {
-    //     window.console.log(conversation);
-    //     conversationJoined = [...conversationJoined, conversation];
-    //     window.console.log(conversationJoined);
-    //     loadMessages(conversation);
-    // });
-    conversationsClient.getConversationBySid(convId).then(conversation => {
+    // get client to connect to
+    conversationsClient.getConversationBySid(convId)
+    .then(conversation => {
         conversationJoined = conversation;
         loadMessages(conversationJoined);
+    })
+    .catch(err => {
+        window.console.log("Failed to get conversation:" + err);
     });
 
     // When new messages are added, update message window
@@ -85,13 +83,13 @@ const loadMessages = async (conversationJoined) => {
         .catch( err => {
             window.console.error("Couldn't fetch messages", err);
         });
-    let scrollMessage = document.getElementById("messages");
-    try {
-        scrollMessage.lastChild.scrollIntoView();
-    }
-    catch(err) {
-        // catches it when new convo is created and 0 messages currently
-    }
+    // let scrollMessage = document.getElementById("messages");
+    // try {
+    //     scrollMessage.lastChild.scrollIntoView();
+    // }
+    // catch(err) {
+    //     // catches it when new convo is created and 0 messages currently
+    // }
 };
 
 /**
@@ -125,7 +123,7 @@ const messageBubble = (identity, message, messageSid, index) => {
     if (userAdminRole) {
         messageContainer.addEventListener("click", event => {
             event.preventDefault();
-            toggleDeleteMenu();
+            toggleDeleteMenu(event.clientX, event.clientY);
             messageToDelete = messageSid;
         });
     }
@@ -135,8 +133,14 @@ const messageBubble = (identity, message, messageSid, index) => {
 /**
  * Toggles show and hide for delete menu
  */
-const toggleDeleteMenu = () => {
+const toggleDeleteMenu = (leftPos, topPos) => {
     let menuToggle = document.getElementById("message-admin-opt");
+    let getBlockChat = document.getElementsByClassName("block_chat");
+    let blockChatX = getBlockChat[0].getBoundingClientRect().x;
+    let blockChatY = getBlockChat[0].getBoundingClientRect().y;
+    menuToggle.style.left = "calc(" + leftPos + "px - " + blockChatX + "px)";
+    menuToggle.style.top = "calc(" + topPos + "px - " + blockChatY + "px)";
+    window.console.log(menuToggle.getBoundingClientRect());
     if (menuToggle.classList.contains("hide")) {
         menuToggle.classList.remove("hide");
         menuToggle.classList.add("show");
