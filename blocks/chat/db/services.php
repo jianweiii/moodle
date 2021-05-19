@@ -18,7 +18,7 @@ $functions = array(
         'classpath'   => 'blocks/chat/classes/external.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
                                                    // defaults to the service's externalib.php
         'description' => 'Deletes participant',    //human readable description of the web service function
-        'type'        => 'read',                  //database rights of the web service function (read, write)
+        'type'        => 'write',                  //database rights of the web service function (read, write)
         'ajax' => true,        // is the service available to 'internal' ajax calls. 
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),    // Optional, only available for Moodle 3.1 onwards. List of built-in services (by shortname) where the function will be included.  Services created manually via the Moodle interface are not supported.
         'capabilities' => '', // comma separated list of capabilities used by the function.

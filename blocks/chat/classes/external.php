@@ -1,8 +1,7 @@
 <?php
 
 require_once($CFG->libdir . "/externallib.php");
-require_once($CFG->dirroot . "/blocks/chat/delete_message.php");
-require_once($CFG->dirroot . "/blocks/chat/create_conversation.php");
+require_once($CFG->dirroot . "/blocks/chat/utils.php");
 
 class chat_external extends external_api {
     
@@ -45,27 +44,34 @@ class chat_external extends external_api {
     }
 
     /**
-    * Returns description of delete_message parameters.
+    * Returns description of delete_participant parameters.
     *
     * @return external_function_parameters
      */
     public static function delete_participant_parameters() {
         return new external_function_parameters(
-                array('sid' => new external_value(PARAM_TEXT, 'sid of participant to delete')) 
+                array(
+                    'participant' => new external_single_structure(
+                        array(
+                            'sid'      => new external_value(PARAM_TEXT, 'sid of participant to delete'),
+                            'identity' => new external_value(PARAM_TEXT, 'identity of participant to delete') 
+                        )
+                    )
+                )
         );
     }
 
     /**
      * Deletes admin selected participant
      * 
-     * @param int $sid The sid of the particular participant
+     * @param array $participant includes sid and identity of participant
      * @return array Success code: 0 for fail, 1 for success
      */
-    public static function delete_participant($sid) {
-        $params = self::validate_parameters(self::delete_message_parameters(), array('sid'=>$sid));
+    public static function delete_participant($participant) {
+        $params = self::validate_parameters(self::delete_participant_parameters(), array('participant'=>$participant));
+        $result = get_delete_participant($params['participant']);
         return array(
-            'sid' => $sid,
-            'success' => 0
+            'result' => $result
         );
     }
 
@@ -77,8 +83,7 @@ class chat_external extends external_api {
     public static function delete_participant_returns() {
         return new external_single_structure(
             array(
-                'sid' => new external_value(PARAM_TEXT, 'sid of message deleted'),
-                'success' => new external_value(PARAM_INT, '0 for fail, 1 for success')
+                'result' => new external_value(PARAM_TEXT, 'results for deletion of participant')
             )
             );
     }
@@ -103,11 +108,8 @@ class chat_external extends external_api {
     public static function create_conversation($convTitle) {
         global $DB;
         $params = self::validate_parameters(self::create_conversation_parameters(), array('title'=>$convTitle));
-        // $result = get_create_conversation($params['title']);
-        $result['id'] = "CH52ffd5ba92c343b4bbd5f0474f35e621";
-        // $result['id'] = "";
+        $result = get_create_conversation($params['title']);
         $result['success'] = "true";
-        $table = "mdl_block_chat";
         $sql = "UPDATE mdl_block_chat SET live=1, conv=" . "'" . $result['id'] . "'" . "  WHERE id=1";
 
         try {

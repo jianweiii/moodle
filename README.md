@@ -14,6 +14,13 @@ Test functionality of Twilio integration with Moodle
     * php composer.phar require twilio/sdk
 <!-- * https://gist.github.com/yehgdotnet/fd9b86a08c5e0c03fa57ad3ae8217892 -->
 
+## Set up environmental variables
+* TWILIO_ACCOUNT_SID 
+* TWILIO_AUTH_TOKEN
+* TWILIO_API_KEY
+* TWILIO_API_SECRET
+* SERVICE_SID
+
 ## mysql commands
 CREATE TABLE mdl_block_chat (
     id bigint(10) NOT NULL AUTO_INCREMENT,

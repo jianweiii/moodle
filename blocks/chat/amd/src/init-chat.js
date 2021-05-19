@@ -3,6 +3,8 @@ import { deleteMessage, deleteParticipant } from './menu-button';
 let messageWindow = document.getElementById("messages");
 let userAdminRole = null;
 let messageToDelete = null;
+let participantToDelete = null;
+let participantIdentity = null;
 let conversationJoined = null;
 
 /**
@@ -11,12 +13,13 @@ let conversationJoined = null;
  * @param {Boolean} isAdmin
  */
 export const connectChat = async (token, convId, isAdmin) => {
-    const Twilio = window.Twilio;
-    let conversationsClient = await Twilio.Conversations.Client.create(token);
     userAdminRole = isAdmin;
 
+    // Connect to Twilio
+    const Twilio = window.Twilio;
+    let conversationsClient = await Twilio.Conversations.Client.create(token);
+
     initDeleteButtons();
-    deleteParticipant();
 
     // Check connection state
     conversationsClient.on("connectionStateChanged", (state) => {
@@ -32,13 +35,16 @@ export const connectChat = async (token, convId, isAdmin) => {
         }
         if (state === "disconnected") {
             connectionStatus.innerHTML = "Disconnected";
+            // remove all nodes inside message window
+            let messageNode = document.getElementById("messages");
+            messageNode.querySelectorAll('*').forEach(messageBubble => messageBubble.remove());
         }
         if (state === "denied") {
             connectionStatus.innerHTML = "Denied";
         }
     });
 
-    // get client to connect to
+    // Get conversation's messages
     conversationsClient.getConversationBySid(convId)
     .then(conversation => {
         conversationJoined = conversation;
@@ -50,7 +56,7 @@ export const connectChat = async (token, convId, isAdmin) => {
 
     // When new messages are added, update message window
     conversationsClient.on("messageAdded", message => {
-        messageBubble(message.author, message.body, message.sid, message.index);
+        messageBubble(message.author, message.body, message.sid, message.index, message.participantSid);
     });
 
     // When messages are removed, update message window
@@ -77,19 +83,12 @@ const loadMessages = async (conversationJoined) => {
         .then( async (messageList) => {
             let messages = await messageList.items;
             messages.forEach( item => {
-                messageBubble(item.author, item.body, item.sid, item.index);
+                messageBubble(item.author, item.body, item.sid, item.index, item.participantSid);
             });
         })
         .catch( err => {
             window.console.error("Couldn't fetch messages", err);
         });
-    // let scrollMessage = document.getElementById("messages");
-    // try {
-    //     scrollMessage.lastChild.scrollIntoView();
-    // }
-    // catch(err) {
-    //     // catches it when new convo is created and 0 messages currently
-    // }
 };
 
 /**
@@ -106,7 +105,7 @@ const loadMessages = async (conversationJoined) => {
  * @param {*} messageSid
  * @param {*} index
  */
-const messageBubble = (identity, message, messageSid, index) => {
+const messageBubble = (identity, message, messageSid, index, participantSid) => {
     let messageContainer = document.createElement("div");
     messageContainer.className = "message-container";
     messageContainer.id = index;
@@ -125,6 +124,8 @@ const messageBubble = (identity, message, messageSid, index) => {
             event.preventDefault();
             toggleDeleteMenu(event.clientX, event.clientY);
             messageToDelete = messageSid;
+            participantToDelete = participantSid;
+            participantIdentity = identity;
         });
     }
     messageWindow.appendChild(messageContainer);
@@ -140,7 +141,6 @@ const toggleDeleteMenu = (leftPos, topPos) => {
     let blockChatY = getBlockChat[0].getBoundingClientRect().y;
     menuToggle.style.left = "calc(" + leftPos + "px - " + blockChatX + "px)";
     menuToggle.style.top = "calc(" + topPos + "px - " + blockChatY + "px)";
-    window.console.log(menuToggle.getBoundingClientRect());
     if (menuToggle.classList.contains("hide")) {
         menuToggle.classList.remove("hide");
         menuToggle.classList.add("show");
@@ -163,7 +163,7 @@ const initDeleteButtons = () => {
     let deleteParticipantButton = document.getElementById("delete-participant");
     deleteParticipantButton.addEventListener("click", event => {
         event.preventDefault();
-        window.alert("Delete Participant Clicked!");
+        deleteParticipant(participantToDelete, participantIdentity);
     });
 };
 

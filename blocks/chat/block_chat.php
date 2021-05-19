@@ -21,21 +21,28 @@ class block_chat extends block_base {
         global $USER, $DB;
 
         $current_user = $USER->firstname;
+        // Check DB if user is blocked
+        $is_user_blocked = $DB->record_exists('block_participants', array('identity'=>$current_user));
+        if (!$is_user_blocked) {
+            // Check DB for live info
+            $this->info = $DB->get_record('block_chat', ['id' => 1]);
+            if (is_siteadmin()) {
+                $this->page->requires->js_call_amd('block_chat/init-conversation', 'createConversation');
+                $this->page->requires->js_call_amd('block_chat/init-conversation', 'endConversation');
+            }
+            if ($this->info->live == "1") {
+                // create access token for twilio client
+                $this->create_participant($current_user, $this->info->conv);
+                $this->generatedToken = createAccessToken(100, $current_user);
+                $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, $this->info->conv, is_siteadmin()));
+            }
+            $this->get_chat_box_html();
+        } else {
+            $this->chat_html .= '<div>Sorry, you have been blocked</div>';
+        }
         
-        // Check DB
-        $this->info = $DB->get_record('block_chat', ['id' => 1]);
-        if (is_siteadmin()) {
-            $this->page->requires->js_call_amd('block_chat/init-conversation', 'createConversation');
-            $this->page->requires->js_call_amd('block_chat/init-conversation', 'endConversation');
-        }
-        if ($this->info->live == "1") {
-            // create access token for twilio client
-            $this->create_participant($current_user, $this->info->conv);
-            $this->generatedToken = createAccessToken(100, $current_user);
-            $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, $this->info->conv, is_siteadmin()));
-        }
 
-        $this->get_chat_box_html();
+
         $this->content         =  new stdClass;
         $this->content->text   = $this->chat_html; 
         
