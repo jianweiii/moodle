@@ -16,7 +16,7 @@ Test functionality of Twilio integration with Moodle
 
 ## mysql commands
 CREATE TABLE mdl_block_chat (
-    id int NOT NULL AUTO_INCREMENT,
+    id bigint(10) NOT NULL AUTO_INCREMENT,
     activity varchar(255) NOT NULL,
     live boolean,
     conversation varchar(255),
@@ -26,6 +26,12 @@ CREATE TABLE mdl_block_chat (
 INSERT INTO mdl_block_chat (activity, live)
 VALUES ("current", false);
 
+
+CREATE TABLE mdl_block_participants (
+    id bigint(10) NOT NULL AUTO_INCREMENT,
+    identity varchar(255),
+    PRIMARY KEY(id)
+);
 ## mysqldump
 ./mysqldump -u root -p moodle > /Applications/MAMP/htdocs/moodle/exported_db.sql
 password: root
