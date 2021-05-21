@@ -6,6 +6,7 @@ let messageToDelete = null;
 let participantToDelete = null;
 let participantIdentity = null;
 let conversationJoined = null;
+// let clickedMessageContainer = null;
 
 /**
  * Core function that establishes connection with Twilio API
@@ -123,6 +124,7 @@ const messageBubble = (identity, message, messageSid, index, participantSid) => 
         messageContainer.addEventListener("click", event => {
             event.preventDefault();
             toggleDeleteMenu(event.clientX, event.clientY);
+            // clickedMessageContainer = messageContainer;
             messageToDelete = messageSid;
             participantToDelete = participantSid;
             participantIdentity = identity;
@@ -139,8 +141,8 @@ const toggleDeleteMenu = (leftPos, topPos) => {
     let getBlockChat = document.getElementsByClassName("block_chat");
     let blockChatX = getBlockChat[0].getBoundingClientRect().x;
     let blockChatY = getBlockChat[0].getBoundingClientRect().y;
-    menuToggle.style.left = "calc(" + leftPos + "px - " + blockChatX + "px)";
-    menuToggle.style.top = "calc(" + topPos + "px - " + blockChatY + "px)";
+    menuToggle.style.left = "calc(" + (leftPos+20) + "px - " + blockChatX + "px)";
+    menuToggle.style.top = "calc(" + (topPos-20) + "px - " + blockChatY + "px)";
     if (menuToggle.classList.contains("hide")) {
         menuToggle.classList.remove("hide");
         menuToggle.classList.add("show");
@@ -158,12 +160,18 @@ const initDeleteButtons = () => {
     deleteMessageButton.addEventListener("click", event => {
         event.preventDefault();
         deleteMessage(messageToDelete);
+        let menuToggle = document.getElementById("message-admin-opt");
+        menuToggle.classList.remove("show");
+        menuToggle.classList.add("hide");
     });
 
     let deleteParticipantButton = document.getElementById("delete-participant");
     deleteParticipantButton.addEventListener("click", event => {
         event.preventDefault();
         deleteParticipant(participantToDelete, participantIdentity);
+        let menuToggle = document.getElementById("message-admin-opt");
+        menuToggle.classList.remove("show");
+        menuToggle.classList.add("hide");
     });
 };
 

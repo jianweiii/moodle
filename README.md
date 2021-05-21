@@ -3,6 +3,24 @@
 Test functionality of Twilio integration with Moodle
 ![Alt text](moodle.png)
 
+## Things to do:
+* Setup Twilio Account
+* Setup environment variables
+* Admin just for chat manager
+    * is_siteadmin() generic or can there be tiers?
+* Add extra field for user as identity for participant
+    * first 3 chars of email, duplicates add number behind
+* Explore if during participant creation, add roles such that javascript can handle deletion instead of having to pass back to backend
+
+## Things to take note of:
+* Admin when creating, have to click "Go Live" before chat can go live
+    * if admin does not click "end", chat will remain live.
+* Database name when creating
+* Generation of Token for Twilio access
+    * Duration of the token (1hour/2hour/3hour)
+        * Do you want to refresh
+    * Identity of the participant
+
 ## Documentations used:
 * https://docs.moodle.org/dev/Javascript_Modules
     * nvm install v14.15.0
@@ -38,10 +56,15 @@ CREATE TABLE mdl_block_chat (
     PRIMARY KEY(id)
 );
 ```
-* Update values when chat is live with the conversation id
+* Update values when chat is live or end with the conversation id
 ```
-UPDATE mdl_block_chat SET live=1, conv=""
-WHERE id=1
+$table = 'block_chat';
+$dataobject = [
+    'id'   => 1,
+    'live' => 0,
+    'conv' => ""
+];
+$DB->update_record($table, $dataobject, $bulk=false);
 ```
 * Create table for blocked participants
     * id
@@ -53,6 +76,7 @@ CREATE TABLE mdl_block_participants (
     PRIMARY KEY(id)
 );
 ```
+
 ## mysqldump
 ./mysqldump -u root -p moodle > /Applications/MAMP/htdocs/moodle/exported_db.sql
 password: root

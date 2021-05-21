@@ -109,12 +109,16 @@ class chat_external extends external_api {
         global $DB;
         $params = self::validate_parameters(self::create_conversation_parameters(), array('title'=>$convTitle));
         $result = get_create_conversation($params['title']);
-        $result['success'] = "true";
-        $sql = "UPDATE mdl_block_chat SET live=1, conv=" . "'" . $result['id'] . "'" . "  WHERE id=1";
+        $table = 'block_chat';
+        $dataobject = [
+            'id'       => 1,
+            'live' => 1,
+            'conv' => $result['id']
+        ]; 
 
         try {
             $transaction = $DB->start_delegated_transaction();
-            $DB->execute($sql);
+            $DB->update_record($table, $dataobject, $bulk=false);
             $transaction->allow_commit();
         } catch(Exception $e) {
             $transaction->rollback($e);
@@ -159,12 +163,15 @@ class chat_external extends external_api {
      */
     public static function end_conversation() {
         global $DB;
-        $table = "mdl_block_chat";
-        $sql = "UPDATE mdl_block_chat SET live=0, conv='' WHERE id=1";
-        $result = "";
+        $table = 'block_chat';
+        $dataobject = [
+            'id'   => 1,
+            'live' => 0,
+            'conv' => ""
+        ]; 
         try {
             $transaction = $DB->start_delegated_transaction();
-            $DB->execute($sql);
+            $DB->update_record($table, $dataobject, $bulk=false);
             $transaction->allow_commit();
             $result = "true";
         } catch(Exception $e) {
