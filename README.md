@@ -1,6 +1,7 @@
 <!-- ABOUT THE PROJECT -->
 # Moodle Chat
 Test functionality of Twilio integration with Moodle
+![Alt text](moodle.png)
 
 ## Documentations used:
 * https://docs.moodle.org/dev/Javascript_Modules
