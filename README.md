@@ -2,6 +2,7 @@
 # Moodle Chat
 Test functionality of Twilio integration with Moodle
 Location: /blocks/chat
+![Alt text](21maylook.png)
 ![Alt text](moodle.png)
 
 ## Things to do:
