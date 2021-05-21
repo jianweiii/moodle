@@ -33,7 +33,7 @@ class block_chat extends block_base {
             if ($this->info->live == "1") {
                 // create access token for twilio client
                 $this->create_participant($current_user, $this->info->conv);
-                $this->generatedToken = createAccessToken(100, $current_user);
+                $this->generatedToken = createAccessToken(1000, $current_user);
                 $this->page->requires->js_call_amd('block_chat/init-chat', 'connectChat', array($this->generatedToken, $this->info->conv, is_siteadmin()));
             }
             $this->get_chat_box_html();
@@ -88,7 +88,7 @@ class block_chat extends block_base {
         if ($this->info->live == "1") {
             $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-app'));
             $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-title'));
-            $this->chat_html .= '<div class="chat-header">Live Chat</div>';
+            $this->chat_html .= '<div class="chat-header">Live Chat (' . $USER->firstname . ')</div>';
             $this->chat_html .= '<div id="connection-status"></div>';
             $this->chat_html .= html_writer::end_tag('div');
             $this->chat_html .= html_writer::start_tag('div', array('class' => 'chat-body'));
@@ -116,7 +116,7 @@ class block_chat extends block_base {
                                                            ->participants
                                                            ->create([
                                                                         "identity" => $identity
-                                                                        // "identity" => "Peter"
+                                                                        // "role"
                                                                     ]
                                                              );
         } catch ( Exception $e) {

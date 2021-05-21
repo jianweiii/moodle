@@ -1,6 +1,7 @@
 <!-- ABOUT THE PROJECT -->
 # Moodle Chat
 Test functionality of Twilio integration with Moodle
+Location: /blocks/chat
 ![Alt text](moodle.png)
 
 ## Things to do:
@@ -10,6 +11,7 @@ Test functionality of Twilio integration with Moodle
     * is_siteadmin() generic or can there be tiers?
 * Add extra field for user as identity for participant
     * first 3 chars of email, duplicates add number behind
+* Create mysql tables
 * Explore if during participant creation, add roles such that javascript can handle deletion instead of having to pass back to backend
 
 ## Things to take note of:
@@ -21,18 +23,7 @@ Test functionality of Twilio integration with Moodle
         * Do you want to refresh
     * Identity of the participant
 
-## Documentations used:
-* https://docs.moodle.org/dev/Javascript_Modules
-    * nvm install v14.15.0
-    * nvm alias default v14.15.0
-    * npm install
-    * npm install -g grunt-cli
-* https://www.twilio.com/docs/libraries/php
-    * https://getcomposer.org/doc/00-intro.md
-        * see download page > guide on installing composer programmatically
-    * php composer.phar require twilio/sdk
-* https://media.twiliocdn.com/sdk/js/conversations/releases/1.1.0/docs/Client.html
-<!-- * https://gist.github.com/yehgdotnet/fd9b86a08c5e0c03fa57ad3ae8217892 -->
+
 
 ## Set up environmental variables
 * TWILIO_ACCOUNT_SID 
@@ -76,6 +67,19 @@ CREATE TABLE mdl_block_participants (
     PRIMARY KEY(id)
 );
 ```
+
+## Documentations used:
+* https://docs.moodle.org/dev/Javascript_Modules
+    * nvm install v14.15.0
+    * nvm alias default v14.15.0
+    * npm install
+    * npm install -g grunt-cli
+* https://www.twilio.com/docs/libraries/php
+    * https://getcomposer.org/doc/00-intro.md
+        * see download page > guide on installing composer programmatically
+    * php composer.phar require twilio/sdk
+* https://media.twiliocdn.com/sdk/js/conversations/releases/1.1.0/docs/Client.html
+<!-- * https://gist.github.com/yehgdotnet/fd9b86a08c5e0c03fa57ad3ae8217892 -->
 
 ## mysqldump
 ./mysqldump -u root -p moodle > /Applications/MAMP/htdocs/moodle/exported_db.sql
